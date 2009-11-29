@@ -134,9 +134,7 @@ function set-title-by-cmd-impl {
   set "$1" "${2:-$PWD}"                      # Replace $2 with $PWD if blank
   # The new title
   #psvar[1]=${(V)$(cd "$2"; print -Pn "%m> %~ || "; print "$1")}
-  #psvar[1]=${(V)$(cd "$2"; print -Pn "%~ || "; print "$1")}
-  #psvar[1]=${(V)$(print "${USER}@${HOST}: $1 ("; cd "$2"; print -Pn "%~)")}
-  psvar[1]=${(V)$(print -Pn "%n@%M: $1 ("; cd "$2"; print -Pn "%~)")}
+  psvar[1]=${(V)$(cd "$2"; print -Pn "%n@%M: %~ || "; print "$1")}
   if [ ${1[(wi)^(*=*|sudo|-*)]} -ne 0 ]; then
     psvar[2]=${1[(wr)^(*=*|sudo|-*)]}        # The one-word command to execute
   else
@@ -250,6 +248,10 @@ setopt ShortLoops          2>/dev/null
 setopt AutoContinue        2>/dev/null
      # Don't attempt to spell-check command names
 setopt NoCorrect           2>/dev/null
+     # Only print options that differ from the default
+setopt NoKshOptionPrint    2>/dev/null
+     # Don't use word splitting on unquoted parameter expansions
+setopt NoShWordSplit       2>/dev/null
 
 #### Environment variables
 export SHELL=$(whence -p zsh)             # Let apps know the full path to zsh
