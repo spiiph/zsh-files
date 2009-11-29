@@ -558,7 +558,8 @@ function precmd {
 
   if booleancheck "$shellopts[titlebar]" ; then
     #psvar[1]=$(print -Pn $'%m> %~')   # set titlebar to Hostname> FullPath
-    psvar[1]=$(print -Pn $'%~')       # set titlebar to FullPath
+    #psvar[1]=$(print -Pn $'%~')       # set titlebar to FullPath
+    psvar[1]=$(print -Pn $'%n@%M: %~') # set titlebar to User@Hostname: FullPath
     set-window-title "$psvar[1]"
   fi
 
