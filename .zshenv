@@ -6,6 +6,12 @@ else
   export EDITOR=vim
 fi
 
+if [[ "$COLORTERM" == gnome-terminal ]]; then
+  if [[ "$TERM" == xterm ]]; then
+    export TERM=xterm-256color
+  fi
+fi
+
 #### Setup
 # If $ZDOTDIR is defined, we keep the definition, otherwise we define $ZDOTDIR
 # to equal $HOME/.zsh.  This is so that any other .z* files can refer to files

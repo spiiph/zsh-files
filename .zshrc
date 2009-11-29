@@ -26,6 +26,9 @@
 # Disable flow control, since it really just annoys me.
 stty -ixon &>/dev/null
 
+# Make Backspace send the correct key sequence in RedHat
+stty erase 
+
 #### Optional Behaviors
 # Setting any of these options will modify the behavior of a new shell to
 # better suit your needs.  These values given specify the default for each
@@ -132,7 +135,8 @@ function set-title-by-cmd-impl {
   # The new title
   #psvar[1]=${(V)$(cd "$2"; print -Pn "%m> %~ || "; print "$1")}
   #psvar[1]=${(V)$(cd "$2"; print -Pn "%~ || "; print "$1")}
-  psvar[1]=${(V)$(print "$1 ("; cd "$2"; print -Pn "%~)")}
+  #psvar[1]=${(V)$(print "${USER}@${HOST}: $1 ("; cd "$2"; print -Pn "%~)")}
+  psvar[1]=${(V)$(print -Pn "%n@%M: $1 ("; cd "$2"; print -Pn "%~)")}
   if [ ${1[(wi)^(*=*|sudo|-*)]} -ne 0 ]; then
     psvar[2]=${1[(wr)^(*=*|sudo|-*)]}        # The one-word command to execute
   else
@@ -686,14 +690,14 @@ function setup-keychain {
 }
 
 # Only start keychain if we're not in cygwin
-if [[ "$OSTYPE" != cygwin ]]; then
-  setup-keychain
-
-  # Functions to wrap commands that would like a working keychain
-  function ssh scp svn {
-    setup-keychain; command "$0" "$@"
-  }
-fi
+#if [[ "$OSTYPE" != cygwin ]]; then
+#  setup-keychain
+#
+#  # Functions to wrap commands that would like a working keychain
+#  function ssh scp svn {
+#    setup-keychain; command "$0" "$@"
+#  }
+#fi
 
 
 ## vim:fdm=expr
