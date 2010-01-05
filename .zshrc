@@ -134,6 +134,8 @@ function set-title-by-cmd-impl {
   set "$1" "${2:-$PWD}"                      # Replace $2 with $PWD if blank
   # The new title
   #psvar[1]=${(V)$(cd "$2"; print -Pn "%m> %~ || "; print "$1")}
+  #psvar[1]=${(V)$(cd "$2"; print -Pn "%~ || "; print "$1")}
+  #psvar[1]=${(V)$(print "$1 ("; cd "$2"; print -Pn "%~)")}
   psvar[1]=${(V)$(cd "$2"; print -Pn "%n@%M: %~ || "; print "$1")}
   if [ ${1[(wi)^(*=*|sudo|-*)]} -ne 0 ]; then
     psvar[2]=${1[(wr)^(*=*|sudo|-*)]}        # The one-word command to execute
@@ -692,15 +694,40 @@ function setup-keychain {
   save-agent-vars
 }
 
-# Only start keychain if we're not in cygwin
-#if [[ "$OSTYPE" != cygwin ]]; then
-#  setup-keychain
+function setup-agent {
+  # Check if the agent seems to be running
+  if verify-agent-vars; then
+    return 0
+  fi
+
+  # Check if we have ssh-agent installed
+  whence -p ssh-agent &>/dev/null || return 0
+
+  # Or if we don't have any public keys...
+  set -- ~/.ssh/id_[rd]sa(N)
+  [ $# -eq 0 ] && return 0
+
+  # Otherwise, we can try starting a new agent.
+  eval $(ssh-agent)
+  verify-agent-vars || return 1
+}
+
+# Functions for using ssh with an agent, but without keychain
+#setup-agent
 #
-#  # Functions to wrap commands that would like a working keychain
-#  function ssh scp svn {
-#    setup-keychain; command "$0" "$@"
-#  }
-#fi
+# Functions to wrap commands that would like a working agent
+#function ssh scp svn {
+#  setup-agent
+#  command "$0" "$@"
+#}
+
+# Functions for using ssh with a keychain
+setup-keychain
+
+# Functions to wrap commands that would like a working keychain
+function ssh scp svn {
+  setup-keychain; command "$0" "$@"
+}
 
 
 ## vim:fdm=expr
