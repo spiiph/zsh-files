@@ -261,7 +261,7 @@ export DIRSTACKSIZE=10                    # Max number of dirs on the dir stack
 
 if booleancheck "$shellopts[utf8]" ; then
   export LANG=en_US.UTF-8                 # Use a unicode english locale
-  export LC_CTYPE=C                       # but fix stupid not-unicode man pages
+  #export LC_CTYPE=C                       # but fix stupid not-unicode man pages
 fi
 
 export HISTSIZE=5500                      # Lines of history to save in mem
