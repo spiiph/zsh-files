@@ -578,20 +578,32 @@ function precmd {
 
 #### Prompt setup functions
 # Global color variable
-#PROMPT_COLOR_NUM=$(((${#${HOST#*.}}+11)%12))
-# Assume a 256 colour terminal, and 109 is nice.
-PROMPT_COLOR_NUM=109
+#PROMPT_COLOR=$(((${#${HOST#*.}}+11)%12))
+if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]]; then
+  # Assume a 256 colour terminal; Cyan-like
+  PROMPT_COLOR=109
+else
+  # Assume an 8 colour terminal; Cyan
+  PROMPT_COLOR=36
+fi
 
 function prompt-setup {
   #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
-  local CC=$'\e[38;5;'$PROMPT_COLOR_NUM'm'
+  if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]]; then
+    local CC=$'\e[38;5;'$PROMPT_COLOR'm'
+  else
+    local CC=$'\e[40;2;'$PROMPT_COLOR'm'
+  fi
+
   #local NORM=$'\e[48;5;0m'
   local NORM=$'\e[0m'
+
   if booleancheck "$shellopts[titlebar]" ; then
     # Can set titlebar, so sparse prompt: 'blue(shortpath)'
     # <blue bright=1><truncate side=right len=20 string="..">
     #   pwd (home=~, only print trailing component)</truncate>&gt;</blue>
     #PS1=$'%{'"$CC"$'%}%20>..>%1~%>>>%{\e[0m%}'
+    #PS1=$'%{'"$CC"$'%}%35<..<%~%<< $%{'"$NORM"$'%} '
     PS1=$'%{'"$CC"$'%}%0~ $%{'"$NORM"$'%} '
   else
     # No titlebar, so verbose prompt: 'white(Hostname)default(::)blue(fullpath)'
@@ -599,15 +611,23 @@ function prompt-setup {
     # <white bright=1>non-FQDN hostname</white>::<blue bright=1>
     #  <truncate side=left len=33 string="..">pwd (home=~)</truncate>&gt;</blue>
     #PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
-    PS1=$'%{\e[1;37m%}%m%{'"$NORM"$'%}::%{'"$CC"$'%}%35<..<%~%<<>%{'"$NORM"'$%}'
+    #PS1=$'%{\e[1;37m%}%m%{'"$NORM"$'%}::%{'"$CC"$'%}%35<..<%~%<<>%{'"$NORM"'$%}'
+    PS1=$'%{\e[33m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<< $%{'"$NORM"$'%} '
+    #PS1=$'%{\e[1;37m%}%m%{'"$NORM"$'%}::%{'"$CC"$'%}%0~ $%{'"$NORM"'$%} '
   fi
 }
 
 function rprompt-setup {
   #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
-  local CC=$'\e[38;5;'$PROMPT_COLOR_NUM'm'
+  if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]]; then
+    local CC=$'\e[38;5;'$PROMPT_COLOR'm'
+  else
+    local CC=$'\e[40;2;'$PROMPT_COLOR'm'
+  fi
+
   #local NORM=$'\e[48;5;0m'
   local NORM=$'\e[0m'
+
   # Right side prompt: '[(red)ERRORS]{(yellow)jobs}(blue)time'
   # in perl pseudocode this time, since html doesn't have a ternary operator...
   # "<red>$psvar[3]</red> "
@@ -713,21 +733,21 @@ function setup-agent {
 }
 
 # Functions for using ssh with an agent, but without keychain
-#setup-agent
-#
+setup-agent
+
 # Functions to wrap commands that would like a working agent
-#function ssh scp svn {
-#  setup-agent
-#  command "$0" "$@"
-#}
+function ssh scp svn {
+  setup-agent
+  command "$0" "$@"
+}
 
 # Functions for using ssh with a keychain
-setup-keychain
+#setup-keychain
 
 # Functions to wrap commands that would like a working keychain
-function ssh scp svn {
-  setup-keychain; command "$0" "$@"
-}
+#function ssh scp svn {
+#  setup-keychain; command "$0" "$@"
+#}
 
 
 ## vim:fdm=expr
