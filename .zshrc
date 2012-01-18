@@ -614,6 +614,9 @@ function prompt-setup {
     #PS1=$'%{\e[1;37m%}%m%{'"$NORM"$'%}::%{'"$CC"$'%}%35<..<%~%<<>%{'"$NORM"'$%}'
     PS1=$'%{\e[33m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<< $%{'"$NORM"$'%} '
     #PS1=$'%{\e[1;37m%}%m%{'"$NORM"$'%}::%{'"$CC"$'%}%0~ $%{'"$NORM"'$%} '
+
+    # Better printout for trace messages (used with function -t <func>)
+    PS4="+%N:%I>"
   fi
 }
 
