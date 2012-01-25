@@ -1,26 +1,30 @@
-### Path
-#### Superuser Paths
-# Set these everywhere; they are useful even if we don't have super user
-# access
-path=($path /usr/sbin /sbin /usr/local/sbin)
+#-------------------------------------------------------------------------------
+# Superuser paths
+#
+path=($path /usr/local/sbin /sbin /usr/sbin)
 
-#### User paths
-# If path doesn't contain $HOME/bin, add it.  Be careful what you put there:
-# It's earlier in the path search than any other directory!
-if [ -d ~/bin ]; then
-  PATH=~/bin:$PATH
-  MANPATH=~/man:$MANPATH
-  INFOPATH=~/info:$INFOPATH
+
+#-------------------------------------------------------------------------------
+# Local paths
+#
+if [ -d $HOME/local ]; then
+  path=($HOME/local/bin $path)
+  manpath=($HOME/local/man $manpath)
+  infopath=($HOME/local/info $infopath)
 fi
 
-if [ -d /opt/bin ]; then
-  PATH=$PATH:/opt/bin
-  MANPATH=$MANPATH:/opt/man
-  INFOPATH=$INFOPATH:/opt/info
+#-------------------------------------------------------------------------------
+# Set editor to local vim, if it exists
+#
+if [ -x $HOME/local/bin/vim ]; then
+  export EDITOR=$HOME/local/bin/vim
+else
+  export EDITOR=/usr/bin/vim
 fi
 
-#### Local paths
-# Local paths should be added to ~/.zprofile.local
+#-------------------------------------------------------------------------------
+# Local customizations
+#
 if [ -f ~/.zprofile.local ]; then
   source ~/.zprofile.local
 fi
