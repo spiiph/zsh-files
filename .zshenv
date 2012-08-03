@@ -8,7 +8,7 @@ fi
 
 if [[ "$COLORTERM" == gnome-terminal ]]; then
   if [[ "$TERM" == xterm ]]; then
-    export TERM=xterm-256color
+    export TERM=gnome-256color
   fi
 fi
 

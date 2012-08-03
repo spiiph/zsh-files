@@ -156,13 +156,9 @@ function set-title-by-cmd-impl {
 
 #### Capability checks
 
-# Xterm, URxvt, Rxvt, aterm, mlterm, Eterm, and dtterm can set the titlebar
-# TODO So can quite a few other terminal emulators...  If I'm missing a
-# terminal emulator that you know can set the titlebar, please let me know.
-[[ -n "$STY" || "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]] || shellopts[titlebar]=0
-
-# TODO Should probably check terminal emulator really is using unicode...
-# [[ TEST IF UNICODE WORKS ]] || shellopts[utf8]=0
+# Xterm, URxvt, Rxvt, aterm, mlterm, Eterm, dtterm, and hopefully
+# gnome-terminal can set the titlebar
+[[ -n "$STY" || "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*|gnome*) ]] || shellopts[titlebar]=0
 
 # Dynamically change a screen name to the last command used when in Gnu Screen
 [[ "$TERM" == (screen*) ]] || shellopts[screen_names]=0
@@ -288,7 +284,11 @@ if autoloadable zrecompile ; then
   zrecompile -pq $ZDOTDIR/.zcompdump
   # We attempt to compile every file in .zfunctions whose name does not
   # contain a dot and does not end in a tilde.
-  zrecompile -pq $ZDOTDIR/.zfunctions.zwc $ZDOTDIR/.zfunctions/^(*~|*.*);
+  funcs=($ZDOTDIR/.zfunctions/.*(.N))
+  if [ ${#funcs[@]} -gt 0 ]; 
+  then
+    zrecompile -pq $ZDOTDIR/.zfunctions.zwc $ZDOTDIR/.zfunctions/^(*~|*.*);
+  fi
 fi
 
 ### Key bindings
@@ -416,20 +416,21 @@ if [[ -f "$HOME/.dircolors" ]]; then
 fi
 
 #### Add colorscheme support
-autoloadable colorscheme && autoload -U colorscheme
+#autoloadable colorscheme && autoload -U colorscheme
 
-if [[ -z "$COLORSCHEME" ]]; then
-  function PickScheme() {
-    local xprop="$(xprop WM_CLASS -id $WINDOWID 2>/dev/null)"
-    (( $? == 0 )) && [[ -n "$xprop" ]] || return
-    if [[ "$xprop" == (WM_CLASS\(STRING\) = \"fxterm\", \"*\") ]]; then
-      colorscheme light
-    else
-      colorscheme dark
-    fi
-  }
-  PickScheme
-fi
+# Removed setting of colorscheme; trying Solarized from .Xresources
+#if [[ -z "$COLORSCHEME" ]]; then
+  #function PickScheme() {
+    #local xprop="$(xprop WM_CLASS -id $WINDOWID 2>/dev/null)"
+    #(( $? == 0 )) && [[ -n "$xprop" ]] || return
+    #if [[ "$xprop" == (WM_CLASS\(STRING\) = \"fxterm\", \"*\") ]]; then
+      #colorscheme light
+    #else
+      #colorscheme dark
+    #fi
+  #}
+  #PickScheme
+#fi
 
 
 ### Completion
@@ -579,7 +580,7 @@ function precmd {
 #### Prompt setup functions
 # Global color variable
 #PROMPT_COLOR=$(((${#${HOST#*.}}+11)%12))
-if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]]; then
+if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*|gnome*) ]]; then
   # Assume a 256 colour terminal; Cyan-like
   PROMPT_COLOR=109
 else
@@ -589,7 +590,7 @@ fi
 
 function prompt-setup {
   #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
-  if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]]; then
+  if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*|gnome*) ]]; then
     local CC=$'\e[38;5;'$PROMPT_COLOR'm'
   else
     local CC=$'\e[40;2;'$PROMPT_COLOR'm'
@@ -622,7 +623,7 @@ function prompt-setup {
 
 function rprompt-setup {
   #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
-  if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*) ]]; then
+  if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*|gnome*) ]]; then
     local CC=$'\e[38;5;'$PROMPT_COLOR'm'
   else
     local CC=$'\e[40;2;'$PROMPT_COLOR'm'
