@@ -165,12 +165,19 @@ function set-title-by-cmd-impl {
 
 ### Colon-separated Arrays
 # Tie colon separated arrays to zsh-arrays, like (MAN)PATH and (man)path
-typeset -T INFOPATH           infopath
-typeset -T LD_LIBRARY_PATH    ld_library_path
-typeset -T LD_LIBRARY_PATH_32 ld_library_path_32
-typeset -T LD_LIBRARY_PATH_64 ld_library_path_64
-typeset -T CLASSPATH          classpath
-typeset -T LS_COLORS          ls_colors
+# Also disallow duplicates
+typeset -TU INFOPATH           infopath
+typeset -TU LD_LIBRARY_PATH    ld_library_path
+typeset -TU LD_LIBRARY_PATH_32 ld_library_path_32
+typeset -TU LD_LIBRARY_PATH_64 ld_library_path_64
+typeset -TU CLASSPATH          classpath
+typeset -TU LS_COLORS          ls_colors
+
+### Duplicates in paths
+# Don't allow duplicates in paths
+typeset -U fpath
+typeset -U path
+typeset -U manpath
 
 ### Aliases
 # First off, allow commands after sudo to still be alias expanded.
