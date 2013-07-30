@@ -40,7 +40,7 @@ stty erase 
 typeset -A shellopts
 shellopts[utf8]=1         # Set up a few programs for UTF-8 mode
 shellopts[titlebar]=1     # Whether the titlebar can be dynamically changed
-shellopts[screen_names]=1 # Dynamically change window names in GNU screen
+shellopts[screen_names]=0 # Dynamically change window names in GNU screen
 shellopts[preexec]=1      # Run preexec to update screen title and titlebar
 shellopts[precmd]=1       # Run precmd to show job count and retval in RPROMPT
 shellopts[rprompt]=1      # Show the right-side time, retval, job count prompt.
@@ -191,17 +191,7 @@ alias ls='ls --color=auto -B'
 alias grep='grep --color=auto'
 alias pu='pushd'
 alias po='popd'
-alias ..='cd ..'
-alias cd..='cd ..'
-alias cd/='cd /'
 alias vi='vim'
-
-alias -g L='|less'
-alias -g T='|tail'
-alias -g H='|head'
-alias -g V='|vim -'
-alias -g B='&>/dev/null &'
-alias -g D='&>/dev/null &|'
 
 booleancheck "$shellopts[utf8]" && alias screen="screen -U"
 
@@ -264,7 +254,6 @@ export DIRSTACKSIZE=10                    # Max number of dirs on the dir stack
 
 if booleancheck "$shellopts[utf8]" ; then
   export LANG=en_US.UTF-8                 # Use a unicode english locale
-  #export LC_CTYPE=C                       # but fix stupid not-unicode man pages
 fi
 
 export HISTSIZE=5500                      # Lines of history to save in mem
@@ -292,7 +281,7 @@ if autoloadable zrecompile ; then
   # We attempt to compile every file in .zfunctions whose name does not
   # contain a dot and does not end in a tilde.
   funcs=($ZDOTDIR/.zfunctions/.*(.N))
-  if [ ${#funcs[@]} -gt 0 ]; 
+  if [ ${#funcs[@]} -gt 0 ];
   then
     zrecompile -pq $ZDOTDIR/.zfunctions.zwc $ZDOTDIR/.zfunctions/^(*~|*.*);
   fi
@@ -389,28 +378,6 @@ if autoloadable edit-command-line; then
   bindkey "\ee" edit-command-line
 fi
 
-### Misc
-#### Man and Info options
-# Make vim the manpage viewer or info viewer
-# Requires manpageview.vim from
-# http://vim.sourceforge.net/scripts/script.php?script_id=489
-if [[ -f $HOME/.vim/plugin/manpageview.vim ]]; then
-  function man {
-    [[ $# -eq 0 ]] && return 1
-    vim -R -c "Man $*" -c "silent! only"
-  }
-
-  function info {
-    [[ $# -eq 1 ]] || return 1
-    vim -R -c "Man $1.i" -c "silent! only"
-  }
-
-  function perldoc {
-    [[ $# -eq 1 ]] || return 1
-    vim -R -c "Man $1.pl" -c "silent! only"
-  }
-fi
-
 #### Less and ls options
 # make less more friendly for non-text input files, see lesspipe(1)
 # If we have it, we'll use it.
@@ -421,24 +388,6 @@ which lesspipe &>/dev/null && eval "$(lesspipe)"
 if [[ -f "$HOME/.dircolors" ]]; then
   which dircolors &>/dev/null && eval `dircolors -b $HOME/.dircolors`
 fi
-
-#### Add colorscheme support
-#autoloadable colorscheme && autoload -U colorscheme
-
-# Removed setting of colorscheme; trying Solarized from .Xresources
-#if [[ -z "$COLORSCHEME" ]]; then
-  #function PickScheme() {
-    #local xprop="$(xprop WM_CLASS -id $WINDOWID 2>/dev/null)"
-    #(( $? == 0 )) && [[ -n "$xprop" ]] || return
-    #if [[ "$xprop" == (WM_CLASS\(STRING\) = \"fxterm\", \"*\") ]]; then
-      #colorscheme light
-    #else
-      #colorscheme dark
-    #fi
-  #}
-  #PickScheme
-#fi
-
 
 ### Completion
 if autoloadable compinit; then
@@ -586,7 +535,6 @@ function precmd {
 
 #### Prompt setup functions
 # Global color variable
-#PROMPT_COLOR=$(((${#${HOST#*.}}+11)%12))
 if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*|gnome*) ]]; then
   # Assume a 256 colour terminal; Cyan-like
   PROMPT_COLOR=109
@@ -596,7 +544,6 @@ else
 fi
 
 function prompt-setup {
-  #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
   if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*|gnome*) ]]; then
     local CC=$'\e[38;5;'$PROMPT_COLOR'm'
   else
@@ -610,18 +557,13 @@ function prompt-setup {
     # Can set titlebar, so sparse prompt: 'blue(shortpath)'
     # <blue bright=1><truncate side=right len=20 string="..">
     #   pwd (home=~, only print trailing component)</truncate>&gt;</blue>
-    #PS1=$'%{'"$CC"$'%}%20>..>%1~%>>>%{\e[0m%}'
-    #PS1=$'%{'"$CC"$'%}%35<..<%~%<< $%{'"$NORM"$'%} '
     PS1=$'%{'"$CC"$'%}%0~ $%{'"$NORM"$'%} '
   else
     # No titlebar, so verbose prompt: 'white(Hostname)default(::)blue(fullpath)'
     # Explained in pseudo-html:
     # <white bright=1>non-FQDN hostname</white>::<blue bright=1>
     #  <truncate side=left len=33 string="..">pwd (home=~)</truncate>&gt;</blue>
-    #PS1=$'%{\e[1;37m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<<>%{\e[0m%}'
-    #PS1=$'%{\e[1;37m%}%m%{'"$NORM"$'%}::%{'"$CC"$'%}%35<..<%~%<<>%{'"$NORM"'$%}'
     PS1=$'%{\e[33m%}%m%{\e[0m%}::%{'"$CC"$'%}%35<..<%~%<< $%{'"$NORM"$'%} '
-    #PS1=$'%{\e[1;37m%}%m%{'"$NORM"$'%}::%{'"$CC"$'%}%0~ $%{'"$NORM"'$%} '
 
     # Better printout for trace messages (used with function -t <func>)
     PS4="+%N:%I>"
@@ -629,14 +571,12 @@ function prompt-setup {
 }
 
 function rprompt-setup {
-  #local CC=$'\e['$((PROMPT_COLOR_NUM>6))$'m\e[3'$((PROMPT_COLOR_NUM%6+1))'m'
   if [[ "$TERM" == ((x|a|ml|dt|E)term*|(u|)rxvt*|screen*|gnome*) ]]; then
     local CC=$'\e[38;5;'$PROMPT_COLOR'm'
   else
     local CC=$'\e[40;2;'$PROMPT_COLOR'm'
   fi
 
-  #local NORM=$'\e[48;5;0m'
   local NORM=$'\e[0m'
 
   # Right side prompt: '[(red)ERRORS]{(yellow)jobs}(blue)time'
@@ -645,7 +585,6 @@ function rprompt-setup {
   #   . ( $psvar[4] ? "<yellow>{" . $psvar[4] ."} </yellow> : '' )
   #     . "<blue bright=1>" . strftime("%L:%M:%S") . "<blue>"
   if booleancheck "$shellopts[rprompt]" ; then
-    #RPS1=$'%{\e[0;31m%}%3v%{\e[0m%} %(4v.%{\e[33m%}{%4v}%{\e[0m%} .)%{'"$CC"$'%}<%D{%L:%M:%S}%{\e[0m%}'
     RPS1=$'%{\e[0;31m%}%3v%{'"$NORM"$'%} %(4v.%{\e[33m%}{%4v}%{'"$NORM"$'%} .)%{'"$CC"$'%}[%D{%L:%M:%S}]%{'"$NORM"$'%}'
   else
     RPS1=""

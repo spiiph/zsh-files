@@ -20,9 +20,3 @@ ZDOTDIR=${ZDOTDIR:-$HOME/.zsh}
 
 fpath=($ZDOTDIR/.zfunctions $fpath) # Add a custom directory for my completion functions.
 typeset -U fpath
-
-# "Outer Terminal" and "Screen Session ID" are only defined while in Gnu Screen
-# but both of these variables would be exported into the environment of a new
-# terminal emulator launched from inside screen.  We unset them if the terminal
-# is set to anything that doesn't begin with screen.
-[[ "$TERM" != (screen*) ]] && unset INTERM && unset STY
