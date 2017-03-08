@@ -261,14 +261,6 @@ export SAVEHIST=5000                      # Lines of history to write out
 export HISTFILE="$ZDOTDIR/.zsh_history"   # File to which history will be saved
 export HOST=${HOST:-$HOSTNAME}            # Ensure that $HOST contains hostname
 
-# Exclude svn and git directories from grep
-export GREP_OPTIONS="\
---exclude=*.git* \
---exclude=*.svn* \
---exclude=*.tmp \
---exclude=*wcprops \
---exclude=entries"
-
 ### Dotfile (Re)Compilation
 # Allows dot files to be compiled into a pre-parsed form for use by zsh, which
 # lets them be sourced much faster - A good idea for any zsh file that's not
@@ -600,6 +592,14 @@ SPROMPT=$'Should zsh correct "%R" to "%r" ? ([\e[0;32mY\e[0m]es/[\e[0;31mN\e[0m]
 
 
 ### SSH Keychain
+
+# Use GNOME keyring if we're in a desktop session and it exists
+function gnome-keyring-start {
+  [[ -z "$DESKTOP_SESSION" ]] && return 1;
+  eval $(gnome-keyring-daemon --start)
+  export SSH_AUTH_SOCK
+}
+
 # Checks if an ssh-agent seems to be working
 function verify-agent-vars {
   # Definitely not SSH_AUTH_SOCK is empty
@@ -680,16 +680,17 @@ function setup-agent {
   # Otherwise, we can try starting a new agent.
   eval $(ssh-agent)
   verify-agent-vars || return 1
+  ssh-add
 }
 
 # Functions for using ssh with an agent, but without keychain
-setup-agent
+#setup-agent
 
 # Functions to wrap commands that would like a working agent
-function ssh scp svn {
-  setup-agent
-  command "$0" "$@"
-}
+#function ssh scp svn {
+  #setup-agent
+  #command "$0" "$@"
+#}
 
 # Functions for using ssh with a keychain
 #setup-keychain
@@ -698,6 +699,8 @@ function ssh scp svn {
 #function ssh scp svn {
 #  setup-keychain; command "$0" "$@"
 #}
+
+gnome-keyring-start
 
 
 ## vim:fdm=expr
